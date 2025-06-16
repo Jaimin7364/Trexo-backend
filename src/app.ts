@@ -16,4 +16,9 @@ app.use(cors({
   credentials: true,
 }));
 
+
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});
+
 export default app;
