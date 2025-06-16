@@ -11,13 +11,13 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 
 app.use(cors({
-  origin: 'http://localhost:3000', // OR use '*' to allow all origins
+  origin: 'https://trexo-frontend.web.app/', // OR use '*' to allow all origins
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000'); // or '*'
+  res.header('Access-Control-Allow-Origin', 'https://trexo-frontend.web.app/'); // or '*'
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   next();
