@@ -1,5 +1,5 @@
 import express from 'express';
-import cors from 'cors';
+// import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 
@@ -10,11 +10,14 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 
+const cors = require('cors');
+
 app.use(cors({
-  origin: 'https://trexo-frontend.web.app/', // OR use '*' to allow all origins
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: ['http://localhost:3000', 'http://localhost:5000', 'https://trexo-frontend.web.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
 }));
+
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'https://trexo-frontend.web.app/'); // or '*'
