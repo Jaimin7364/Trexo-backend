@@ -6,10 +6,11 @@ import { createProperty, createVehicle, getAllProperties, getAllVehicles } from 
 const router = express.Router();
 
 // ✅ Admin-only routes
-router.post('/property', createProperty);
-router.post('/vehicle', createVehicle);
+router.post('/property', verifyToken, isAdmin, createProperty);
+router.post('/vehicle', verifyToken, isAdmin, createVehicle);
 
 // (Optional) View all (admin dashboard)
 
-
+router.get('/properties', getAllProperties,verifyToken,isAdmin);
+router.get('/vehicles', getAllVehicles,verifyToken,isAdmin);
 export default router;
