@@ -5,7 +5,7 @@ import { sendOtpEmail,sendResetPasswordEmail } from '../utils/sendEmail';
 import { generateResetToken } from '../utils/generateResetToken';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
-
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 const generateToken = (userId: string): string => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET as string, {
     expiresIn: '3d'  // ✅ 3-day login session
@@ -18,18 +18,26 @@ export const signup = async (req: Request, res: Response) => {
   try {
     const userExists = await User.findOne({ email });
 
-    if (userExists && userExists.isVerified)
+    if (userExists && userExists.isVerified) {
       return res.status(400).json({ error: 'User already registered and verified' });
+    }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const user = userExists
-      ? await User.findOneAndUpdate(
-          { email },
-          { name, phone, password, otp, isVerified: false },
-          { new: true }
-        )
-      : await User.create({ name, email, phone, password, otp });
+    let user;
+
+    if (userExists) {
+      // ✅ Update existing unverified user, trigger pre-save hook
+      userExists.name = name;
+      userExists.phone = phone;
+      userExists.password = password; // will be hashed in pre-save
+      userExists.otp = otp;
+      userExists.isVerified = false;
+      user = await userExists.save();
+    } else {
+      // ✅ Create new user
+      user = await User.create({ name, email, phone, password, otp });
+    }
 
     await sendOtpEmail(email, otp);
 
@@ -38,6 +46,7 @@ export const signup = async (req: Request, res: Response) => {
     res.status(400).json({ error: err.message });
   }
 };
+
 
 // STEP 2: Verify OTP
 export const verifyOtp = async (req: Request, res: Response) => {
@@ -63,16 +72,32 @@ export const verifyOtp = async (req: Request, res: Response) => {
 // STEP 3: Login
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
+
   try {
     const user = await User.findOne({ email });
-    if (!user || !user.isVerified)
+
+    if (!user || !user.isVerified) {
       return res.status(401).json({ error: 'User not verified or doesn’t exist' });
+    }
 
     const isMatch = await user.comparePassword(password);
-    if (!isMatch) return res.status(401).json({ error: 'Invalid password' });
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid password' });
+    }
 
     const token = generateToken(user.id);
-    res.status(200).json({ message: 'Login successful', token });
+
+    // ✅ Include user details in the response
+    res.status(200).json({
+      message: 'Login successful',
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
@@ -131,4 +156,30 @@ export const resetPassword = async (req: Request, res: Response) => {
   await user.save();
 
   res.json({ message: 'Password reset successful' });
+};
+
+export const getProfile = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.user?._id;
+
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    const user = await User.findById(userId).select('-password -otp -resetPasswordToken -resetPasswordExpire');
+
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Error in getProfile:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
 };

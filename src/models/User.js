@@ -7,10 +7,11 @@ export interface IUser extends Document {
   email: string;
   phone: string;
   password: string;
-  otp?: string;
+  role: 'admin' | 'user';
+  otp?: string | null;
   isVerified: boolean;
-  resetPasswordToken?: string;
-  resetPasswordExpire?: Date;
+  resetPasswordToken?: string | null;
+  resetPasswordExpire?: Date | null;
   comparePassword(enteredPassword: string): Promise<boolean>;
 }
 
@@ -19,22 +20,23 @@ const userSchema = new Schema<IUser>(
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     email: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
-      validate: [validator.isEmail, 'Invalid email']
+      trim: true,
+      validate: [validator.isEmail, 'Invalid email'],
     },
     phone: {
       type: String,
       required: true,
       validate: {
         validator: (v: string) => /^[0-9]{10}$/.test(v),
-        message: 'Phone must be 10 digits'
-      }
+        message: 'Phone must be 10 digits',
+      },
     },
     password: {
       type: String,
@@ -44,32 +46,37 @@ const userSchema = new Schema<IUser>(
         validator: (v: string) =>
           /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}$/.test(v),
         message:
-          'Password must include uppercase, number, special character and be at least 8 characters'
-      }
+          'Password must include uppercase, number, special character and be at least 8 characters',
+      },
     },
     otp: {
       type: String,
-      default: null
+      default: null,
     },
     isVerified: {
       type: Boolean,
-      default: false
+      default: false,
     },
     resetPasswordToken: {
       type: String,
-      default: null
+      default: null,
     },
     resetPasswordExpire: {
       type: Date,
-      default: null
-    }
+      default: null,
+    },
+    role: {
+      type: String,
+      enum: ['admin', 'user'],
+      default: 'user',
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 
-// Hash password before saving
+// ✅ Hash password if modified before save
 userSchema.pre<IUser>('save', async function (next) {
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
@@ -77,7 +84,7 @@ userSchema.pre<IUser>('save', async function (next) {
   next();
 });
 
-// Method to compare password
+// ✅ Compare entered password with hashed password
 userSchema.methods.comparePassword = async function (
   enteredPassword: string
 ): Promise<boolean> {

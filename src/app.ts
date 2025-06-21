@@ -1,32 +1,26 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import authRoutes from './routes/auth';
-
-dotenv.config();
+import authRoutes from './routes/auth'; // adjust if needed
+import adminRoutes from './routes/admin';
 
 const app = express();
 
-
-app.use('/api/auth', authRoutes);
-
-// const cors = require('cors');
-
-app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5000', 'https://trexo-frontend.web.app'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true,
-}));
+// ✅ Body parser to fix req.body undefined error
 app.use(express.json());
-// app.use((req, res, next) => {
-//   res.header('Access-Control-Allow-Origin', 'https://trexo-frontend.web.app/'); // or '*'
-//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-//   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-//   next();
-// });
 
-app.get('/ping', (req, res) => {
-  res.send('pong');
-});
+// ✅ Optional: If you're sending form-urlencoded data
+// app.use(express.urlencoded({ extended: true }));
+
+// ✅ CORS setup
+app.use(
+  cors({
+    origin: '*',
+    credentials: true,
+  })
+);
+
+// ✅ Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 
 export default app;

@@ -1,6 +1,9 @@
 import express from 'express';
-import { signup, login, verifyOtp } from '../controllers/authController';
+import { signup, login, verifyOtp, getProfile } from '../controllers/authController';
 import { forgotPassword, resetPassword } from '../controllers/authController';
+import { verifyToken } from '../middleware/authMiddleware';
+import { getAllProperties, getAllVehicles } from '../controllers/adminController';
+
 const router = express.Router();
 
 router.post('/signup', (req, res, next) => {
@@ -18,4 +21,9 @@ router.post('/forgot-password', (req, res, next) => {
 router.post('/reset-password/:token', (req, res, next) => {
   Promise.resolve(resetPassword(req, res)).catch(next);
 });
+router.get('/profile', verifyToken, (req, res, next) => {
+  Promise.resolve(getProfile(req, res)).catch(next);
+});
+router.get('/properties', getAllProperties);
+router.get('/vehicles', getAllVehicles);
 export default router;
