@@ -76,9 +76,10 @@ stages:
 
         echo "Connecting to EC2 and deploying..."
         ssh -i ec2_key -o StrictHostKeyChecking=no $(ssh_host) << EOF
-          cd $project_dir
+          cd $(project_dir)
+          git reset --hard HEAD
           git pull origin main
-          npm install
+          npm ci
           pm2 restart all
         EOF
       displayName: "SSH Deploy Script"
