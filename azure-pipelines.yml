@@ -5,7 +5,6 @@ trigger:
 
 variables:
   ssh_host: "ubuntu@13.203.148.184"
-  ssh_key: "$(SSH_PRIVATE_KEY)"
   project_dir: "/home/ubuntu/Trexo-backend"
 
 stages:
@@ -20,7 +19,59 @@ stages:
     steps:
     - script: |
         echo "Setting up SSH key..."
-        echo "$ssh_key" > ec2_key
+        cat <<EOF > ec2_key
+        -----BEGIN RSA PRIVATE KEY-----
+        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
+        -----END RSA PRIVATE KEY-----
+        EOF
         chmod 600 ec2_key
 
         echo "Connecting to EC2 and deploying..."
