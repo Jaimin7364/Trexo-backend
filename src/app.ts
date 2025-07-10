@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth'; // adjust if needed
-import adminRoutes from './routes/admin';
+import sellRoutes from './routes/sell';
 import viewRoutes from './routes/view'; // add this line, adjust the path if needed
 
 const app = express();
@@ -22,6 +22,6 @@ app.use(
 
 // ✅ Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/api/sell', sellRoutes);
 app.use('/api/view', viewRoutes);
 export default app;

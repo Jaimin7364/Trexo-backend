@@ -2,7 +2,7 @@ import express from 'express';
 import { signup, login, verifyOtp, getProfile } from '../controllers/authController';
 import { forgotPassword, resetPassword } from '../controllers/authController';
 import { verifyToken } from '../middleware/authMiddleware';
-import { getAllProperties, getAllVehicles } from '../controllers/adminController';
+import { getAllProperties, getAllVehicles } from '../controllers/sell';
 
 const router = express.Router();
 
