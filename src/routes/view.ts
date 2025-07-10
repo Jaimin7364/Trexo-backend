@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import Property from '../models/property';
 import Vehicle from '../models/vehicle';
 
@@ -25,18 +25,40 @@ router.get('/vehicle', async (_req, res) => {
     res.status(500).json({ message: 'Failed to fetch vehicles', error: err });
   }
 });
-// GET /api/view/property/:id
-// router.get('/property/:id', async (req: Request, res: Response) => {
+
+// Add this inside your existing router file
+
+// GET /api/view/vehicle/:id
+
+router.get('/vehicle/:id', async (_req, res) => {
+  const { id } = _req.params;
+  try {
+    const vehicle = await Vehicle.findById(id).populate('createdBy', 'name email');
+    res.status(200).json(vehicle);
+  } catch (err) {
+    console.error(`Error fetching vehicle by ID (${id}):`, err);
+    res.status(500).json({ message: 'Failed to fetch vehicle details', error: err });
+  }
+});
+
+
+// router.get('/vehicle/:id', async (req: Request, res: Response) => {
 //   const { id } = req.params;
+
 //   try {
-//     const property = await Property.findById(id).populate('createdBy', 'name email');
-//     if (!property) {
-//       return res.status(404).json({ message: 'Property not found' });
+//     const vehicle = await Vehicle.findById(id).populate('createdBy', 'name email');
+
+//     if (!vehicle) {
+//       return res.status(404).json({ message: 'Vehicle not found' });
 //     }
-//     res.status(200).json(property);
+
+//     res.status(200).json(vehicle);
 //   } catch (err) {
-//     console.error(`Error fetching property with ID ${id}:`, err);
-//     res.status(500).json({ message: 'Failed to fetch property', error: err });
+//     console.error(`Error fetching vehicle by ID (${id}):`, err);
+//     res.status(500).json({ message: 'Failed to fetch vehicle details', error: err });
 //   }
-// });  
+// });
+
+
+
 export default router;
