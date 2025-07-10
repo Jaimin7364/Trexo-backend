@@ -1,0 +1,33 @@
+trigger:
+  branches:
+    include:
+      - main
+
+variables:
+  ssh_host: "ubuntu@13.203.148.184"
+  ssh_key: "$(SSH_PRIVATE_KEY)"
+  project_dir: "/home/ubuntu/Trexo-backend"
+
+stages:
+- stage: DeployToEC2
+  displayName: "Deploy to EC2 Instance"
+  jobs:
+  - job: SSHDeploy
+    displayName: "SSH into EC2 and Deploy"
+    pool:
+      vmImage: "ubuntu-latest"
+
+    steps:
+    - script: |
+        echo "Setting up SSH key..."
+        echo "$ssh_key" > ec2_key
+        chmod 600 ec2_key
+
+        echo "Connecting to EC2 and deploying..."
+        ssh -i ec2_key -o StrictHostKeyChecking=no $(ssh_host) << EOF
+          cd $project_dir
+          git pull origin main
+          npm install
+          pm2 restart all
+        EOF
+      displayName: "SSH Deploy Script"
