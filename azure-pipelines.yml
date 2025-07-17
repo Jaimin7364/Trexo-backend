@@ -71,7 +71,7 @@ steps:
     -----END RSA PRIVATE KEY-----
     EOF
     chmod 600 ~/.ssh/id_rsa
-    ssh-keyscan -H $droplet_host >> ~/.ssh/known_hosts
+    ssh-keyscan -H $(droplet_host) >> ~/.ssh/known_hosts
   displayName: 'Configure SSH Key'
 
 - script: |
