@@ -5,16 +5,9 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-- group: trexo  # ✅ This links the variable group named "trexo"
-
-- name: droplet_host
-  value: '209.38.124.176'
-
-- name: droplet_user
-  value: 'root'
-
-- name: project_dir
-  value: '/root/Trexo-backend'
+  droplet_host: '209.38.124.176'
+  droplet_user: 'root'
+  project_dir: '/root/Trexo-backend'
 
 steps:
 - task: UseNode@1
@@ -22,14 +15,62 @@ steps:
     version: '18.x'
 
 - script: |
-    echo "Setting up SSH..."
+    echo "Setting up SSH key..."
     mkdir -p ~/.ssh
-    echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    cat <<EOF > ~/.ssh/id_rsa
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    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
+    -----END OPENSSH PRIVATE KEY-----
+    EOF
     chmod 600 ~/.ssh/id_rsa
     ssh-keyscan -H $droplet_host >> ~/.ssh/known_hosts
   displayName: 'Configure SSH Key'
-  env:
-    SSH_PRIVATE_KEY: $(ssh-private-key)
 
 - script: |
     echo "Deploying to droplet..."
