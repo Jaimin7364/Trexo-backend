@@ -17,14 +17,13 @@ export const createProperty = async (req: AuthenticatedRequest, res: Response) =
 
 export const createVehicle = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    // Type assertion: tell TS these are multer-s3 uploaded files
     const files = req.files as Express.MulterS3.File[];
-
     const imageUrls = files.map(file => file.location);
 
     const vehicle = await Vehicle.create({
       ...req.body,
-      images: imageUrls,
+      imageUrls,
+      createdBy: req.user?._id, // ✅ Set the user creating the vehicle
     });
 
     res.status(201).json(vehicle);
@@ -32,6 +31,7 @@ export const createVehicle = async (req: AuthenticatedRequest, res: Response) =>
     res.status(500).json({ message: 'Error creating vehicle', error });
   }
 };
+
 
 
 
