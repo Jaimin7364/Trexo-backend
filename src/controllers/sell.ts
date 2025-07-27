@@ -1,8 +1,9 @@
 // controllers/adminController.ts
 import { Response } from 'express';
 import Property from '../models/property';
-import Vehicle from '../models/vehicle';
+import Vehicle, { IVehicle } from '../models/vehicle';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
+import { Document, Types } from 'mongoose';
 
 export const createProperty = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -16,13 +17,23 @@ export const createProperty = async (req: AuthenticatedRequest, res: Response) =
 
 export const createVehicle = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const newVehicle = new Vehicle({ ...req.body, createdBy: req.user?._id });
-    const saved = await newVehicle.save();
-    res.status(201).json(saved);
-  } catch (err) {
-    res.status(500).json({ message: 'Error creating vehicle', error: err });
+    // Type assertion: tell TS these are multer-s3 uploaded files
+    const files = req.files as Express.MulterS3.File[];
+
+    const imageUrls = files.map(file => file.location);
+
+    const vehicle = await Vehicle.create({
+      ...req.body,
+      images: imageUrls,
+    });
+
+    res.status(201).json(vehicle);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating vehicle', error });
   }
 };
+
+
 
 export const getAllProperties = async (req: AuthenticatedRequest, res: Response) => {
   try {
