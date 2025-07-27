@@ -77,6 +77,7 @@ stages:
         echo "Connecting to Droplet and deploying..."
         ssh -i do_key -o StrictHostKeyChecking=no $(ssh_host) << EOF
           cd $project_dir
+          git fetch
           git pull origin main
           npm install
           pm2 restart all
