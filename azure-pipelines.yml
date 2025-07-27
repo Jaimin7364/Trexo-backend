@@ -75,11 +75,24 @@ stages:
         chmod 600 do_key
 
         echo "Connecting to Droplet and deploying..."
-        ssh -i do_key -o StrictHostKeyChecking=no $(ssh_host) << EOF
-          cd $project_dir
-          git fetch
+        ssh -i do_key -o StrictHostKeyChecking=no "$ssh_host" << 'EOF'
+          cd /root/Trexo-backend
+          echo "Git remote:"
+          git remote -v
+
+          echo "Stashing local changes (if any)..."
+          git stash || true
+
+          echo "Fetching latest changes..."
+          git fetch origin
+
+          echo "Pulling from origin/main..."
           git pull origin main
+
+          echo "Installing dependencies..."
           npm install
+
+          echo "Restarting app with pm2..."
           pm2 restart all
-        EOF
+        EOF 
       displayName: "SSH Deploy Script"
