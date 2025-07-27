@@ -75,7 +75,7 @@ stages:
         chmod 600 do_key
 
         echo "Connecting to Droplet and deploying..."
-        ssh -i do_key -o StrictHostKeyChecking=no "$ssh_host" << 'EOF'
+        ssh -i do_key -o StrictHostKeyChecking=no $(ssh_host) << EOF
           cd /root/Trexo-backend
           echo "Git remote:"
           git remote -v
